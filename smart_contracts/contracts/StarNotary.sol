@@ -12,19 +12,29 @@ contract StarNotary is ERC721 {
     string mag;
   }
 
-  uint256 public tokenCount;
 
-  mapping(uint256 => Star) public tokenIdToStarInfo; 
-  mapping(uint256 => uint256) public starsForSale;
+  mapping(uint256 => Star) tokenIdToStarInfo; 
+  mapping(uint256 => uint256) starsForSale;
 
   function createStar(string _name, string _story, string _ra, string _dec, string _mag) public { 
-    tokenCount++;
-    uint256 _tokenId = tokenCount;
+
+    uint256 _tokenId = createMappingKeyHash(_ra, _dec, _mag);    
+
     Star memory newStar = Star(_name, _story, _ra, _dec, _mag);
 
     tokenIdToStarInfo[_tokenId] = newStar;
 
     _mint(msg.sender, _tokenId);
+  }
+
+  function getStar(uint256 _tokenId) public view returns (string name, string story, string ra, string dec, string mag) {
+    Star memory star = tokenIdToStarInfo[_tokenId];
+    name = star.name;
+    story = star.story;
+    ra = star.ra;
+    dec = star.dec;
+    mag = star.mag;
+    return (name, story, ra, dec, mag);
   }
 
   function putStarUpForSale(uint256 _tokenId, uint256 _price) public { 
@@ -49,5 +59,12 @@ contract StarNotary is ERC721 {
       msg.sender.transfer(msg.value - starCost);
     }
   }
+  
+  // Convert string coordinates into sha3 key
+  function createMappingKeyHash(string _ra, string _dec, string _mag) public pure returns (uint256) {
+    bytes32 _bytes32Hash = keccak256(abi.encodePacked(_ra, _dec, _mag));
+    return uint256(_bytes32Hash);
+  }
 
 }
+
