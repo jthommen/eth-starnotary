@@ -17,12 +17,12 @@
     <div class="row">
       <h2>Claim a star</h2>
       <label class="bold">Star Name:</label>
-      <input id="star-name">
+      <input type="text" id="star-name">
     </div>
 
     <div class="row">
       <label class="bold">Star Story:</label>
-      <input id="star-story">
+      <input type="text" id="star-story">
     </div>
 
     <div class="row">
@@ -30,15 +30,15 @@
     </div>
     <div class="row">
       <label class="bold">ra:</label>
-      <input class="star-ra">
+      <input type="text" id="star-ra">
     </div>
     <div class="row">
       <label class="bold">dec:</label>
-      <input class="star-dec">
+      <input type="text" id="star-dec">
     </div>
     <div class="row">
       <label class="bold">mag:</label>
-      <input class="star-mag">
+      <input type="text" id="star-mag">
     </div>
     <button id="claim-button" onclick="claimButtonClicked()">Claim Star</button>
 
@@ -47,15 +47,15 @@
     <h2>Get a star id</h2>
     <div class="row">
       <label class="bold">ra:</label>
-      <input type="text" value="ra_123.53" id="star-id-ra">
+      <input type="text" id="star-id-ra">
     </div>
     <div class="row">
       <label class="bold">dec:</label>
-      <input type="text" value="dec_532.13" id="star-id-dec">
+      <input type="text" id="star-id-dec">
     </div>
     <div class="row">
       <label class="bold">mag:</label>
-      <input type="text" value="mag_852.3" id="star-id-mag">
+      <input type="text" id="star-id-mag">
     </div>
     <button id="id-button" onclick="idButtonClicked()">Get Star ID</button>
     <div id="star-hash"></div>
@@ -510,18 +510,24 @@
 
     // Enable claim button being clicked
     function claimButtonClicked() {
-      web3.eth.getAccounts(function (error, accounts) {
+      web3.eth.getAccounts(function(error, accounts) {
         if (error) {
           console.log(error)
           return
         }
         var account = accounts[0]
-        starNotary.claimStar(function (error, result) {
+        let name = document.getElementById('star-name').value;
+        let story = document.getElementById('star-story').value;
+        let ra = document.getElementById('star-ra').value;
+        let dec = document.getElementById('star-dec').value;
+        let mag = document.getElementById('star-mag').value;
+
+        starNotary.createStar(name, story, ra, dec, mag, function(error, result) {
           if (!error) {
-            var starClaimedEvent = starNotary.starClaimed({ from: account });
-            starClaimedEvent.watch(function (error, result) {
+            var starCreatedEvent = starNotary.Transfer();
+            starCreatedEvent.watch(function(error, result) {
               if (!error) {
-                location.reload();
+                alert('You just created a new star!');
               } else {
                 console.log('watching for star claimed event is failing');
               }
@@ -531,7 +537,7 @@
           }
         });
 
-      })
+      });
     }
 
     // Document starId
