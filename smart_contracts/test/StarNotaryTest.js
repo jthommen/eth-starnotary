@@ -1,6 +1,9 @@
 const StarNotary = artifacts.require('StarNotary')
 
 contract('StarNotary', accounts => {
+  
+  // Error catching from solidity
+  let catchRevert = require("./exceptions.js").catchRevert;
   let defaultAccount = accounts[0];
 
   // Instantiates a new, fresh contract for every test
@@ -43,6 +46,11 @@ contract('StarNotary', accounts => {
         await this.contract.getStar(producedHash), 
         ['First Star', 'Awesome star!', 'ra_1', 'dec_1', 'mag_1'], 'Returned star info should be equal.');
     });
+
+    it('should abort with a revert error', async function() {
+      await catchRevert(this.contract.createStar('First Star', 'Awesome star!', 'ra_1', 'dec_1', 'mag_1', {from: user1}));
+    });
+
   });
 
   describe('buying and selling stars', () => { 
@@ -61,7 +69,6 @@ contract('StarNotary', accounts => {
     it('user1 can put up their star for sale', async function () { 
       assert.equal(await this.contract.ownerOf(starId), user1)
       await this.contract.putStarUpForSale(starId, starPrice, {from: user1})
-        
       assert.equal(await this.contract.starsForSale(starId), starPrice)
     })
 

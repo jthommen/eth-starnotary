@@ -10,20 +10,24 @@ contract StarNotary is ERC721 {
     string ra;
     string dec;
     string mag;
+    bool exists;
   }
 
+  mapping(uint256 => Star) public tokenIdToStarInfo; 
+  mapping(uint256 => uint256) public starsForSale;
 
-  mapping(uint256 => Star) tokenIdToStarInfo; 
-  mapping(uint256 => uint256) starsForSale;
+  //Modifier: Ensure stars are only claimed once
+  modifier uniqueStar(string _ra, string _dec, string _mag) {
+    uint256 starKey = createMappingKeyHash(_ra, _dec, _mag);
+    bool starExists = tokenIdToStarInfo[starKey].exists;
+    require(!starExists, "Star already registered.");
+    _;
+  }
 
-  function createStar(string _name, string _story, string _ra, string _dec, string _mag) public { 
-
+  function createStar(string _name, string _story, string _ra, string _dec, string _mag) public uniqueStar(_ra, _dec, _mag) { 
     uint256 _tokenId = createMappingKeyHash(_ra, _dec, _mag);    
-
-    Star memory newStar = Star(_name, _story, _ra, _dec, _mag);
-
+    Star memory newStar = Star(_name, _story, _ra, _dec, _mag, true);
     tokenIdToStarInfo[_tokenId] = newStar;
-
     _mint(msg.sender, _tokenId);
   }
 
