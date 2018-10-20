@@ -1,0 +1,14 @@
+Star Notary Project
+//////////
+Network: Rinkeby
+StarNotary contract address: 0xCe4947188eABE6f5a97C5B0fB19152F781362A23
+StarNotry contract tx hash: 0x4f2fb473016c8be213a37d6b75ac599e1b972872289d51bf28cd67886789c93c
+Create Star tx hash: 0xfb269f753f7948c3a98aa786c8bc85b5fdc9d7308e2a1b93c5a5c379054ce121
+Star Data:
+- name: Planet Zero
+- story: First Star in the universe!
+- ra: ra_123.53
+- dec: dec_532.13
+- mag: mag_852.3
+TokenId (StarId): 60924048617905623938121768168387375080742574979753073498829376012983798998244
+Up for sale tx hash: 0x4a421656ea1328391ef63d68ee5c3880b9c0c5e26e9ade69c20cd32b78b676dd

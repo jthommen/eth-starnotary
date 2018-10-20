@@ -13,8 +13,8 @@ contract StarNotary is ERC721 {
     bool exists;
   }
 
-  mapping(uint256 => Star) public tokenIdToStarInfo; 
-  mapping(uint256 => uint256) public starsForSale;
+  mapping(uint256 => Star) tokenIdToStarInfo; 
+  mapping(uint256 => uint256) starsForSale;
 
   //Modifier: Ensure stars are only claimed once
   modifier uniqueStar(string _ra, string _dec, string _mag) {
@@ -39,6 +39,10 @@ contract StarNotary is ERC721 {
     dec = star.dec;
     mag = star.mag;
     return (name, story, ra, dec, mag);
+  }
+
+  function getStarForSale(uint256 _tokenId) public view returns (uint256 price) {
+    return starsForSale[_tokenId];
   }
 
   function putStarUpForSale(uint256 _tokenId, uint256 _price) public { 
@@ -71,4 +75,3 @@ contract StarNotary is ERC721 {
   }
 
 }
-
