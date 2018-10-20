@@ -13,26 +13,36 @@ contract StarNotary is ERC721 {
     bool exists;
   }
 
-  mapping(uint256 => Star) tokenIdToStarInfo; 
-  mapping(uint256 => uint256) starsForSale;
+  mapping(uint256 => Star) tokenIdToStarInfoMap; 
+  mapping(uint256 => uint256) starsForSaleMap;
 
   //Modifier: Ensure stars are only claimed once
   modifier uniqueStar(string _ra, string _dec, string _mag) {
     uint256 starKey = createMappingKeyHash(_ra, _dec, _mag);
-    bool starExists = tokenIdToStarInfo[starKey].exists;
+    bool starExists = tokenIdToStarInfoMap[starKey].exists;
     require(!starExists, "Star already registered.");
     _;
+  }
+
+  function checkIfStarExist(string _ra, string _dec, string _mag) public view returns (bool exists){
+    uint256 starKey = createMappingKeyHash(_ra, _dec, _mag);
+    bool starExists = tokenIdToStarInfoMap[starKey].exists;
+    if(starExists) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   function createStar(string _name, string _story, string _ra, string _dec, string _mag) public uniqueStar(_ra, _dec, _mag) { 
     uint256 _tokenId = createMappingKeyHash(_ra, _dec, _mag);    
     Star memory newStar = Star(_name, _story, _ra, _dec, _mag, true);
-    tokenIdToStarInfo[_tokenId] = newStar;
+    tokenIdToStarInfoMap[_tokenId] = newStar;
     _mint(msg.sender, _tokenId);
   }
 
-  function getStar(uint256 _tokenId) public view returns (string name, string story, string ra, string dec, string mag) {
-    Star memory star = tokenIdToStarInfo[_tokenId];
+  function tokenIdToStarInfo(uint256 _tokenId) public view returns (string name, string story, string ra, string dec, string mag) {
+    Star memory star = tokenIdToStarInfoMap[_tokenId];
     name = star.name;
     story = star.story;
     ra = star.ra;
@@ -42,19 +52,19 @@ contract StarNotary is ERC721 {
   }
 
   function getStarForSale(uint256 _tokenId) public view returns (uint256 price) {
-    return starsForSale[_tokenId];
+    return starsForSaleMap[_tokenId];
   }
 
   function putStarUpForSale(uint256 _tokenId, uint256 _price) public { 
     require(this.ownerOf(_tokenId) == msg.sender, "Must be the owner to sell a star.");
 
-    starsForSale[_tokenId] = _price;
+    starsForSaleMap[_tokenId] = _price;
   }
 
   function buyStar(uint256 _tokenId) public payable { 
-    require(starsForSale[_tokenId] > 0, "Star must be up for sale.");
+    require(starsForSaleMap[_tokenId] > 0, "Star must be up for sale.");
     
-    uint256 starCost = starsForSale[_tokenId];
+    uint256 starCost = starsForSaleMap[_tokenId];
     address starOwner = this.ownerOf(_tokenId);
     require(msg.value >= starCost, "Not enough money available to buy the star.");
 

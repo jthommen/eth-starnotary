@@ -45,8 +45,13 @@ contract('StarNotary', accounts => {
 
     it('can create a star and get its data', async function() {
       assert.deepEqual(
-        await this.contract.getStar(producedHash), 
+        await this.contract.tokenIdToStarInfo(producedHash), 
         ['First Star', 'Awesome star!', 'ra_1', 'dec_1', 'mag_1'], 'Returned star info should be equal.');
+    });
+
+    it('can check if star exists', async function() {
+      assert.isTrue(await this.contract.checkIfStarExist('ra_1', 'dec_1', 'mag_1'));
+      assert.isFalse(await this.contract.checkIfStarExist('1', '2', '3'));
     });
 
     it('registering existing star should abort with a revert error', async function() {
