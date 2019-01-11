@@ -1,4 +1,4 @@
-pragma solidity ^0.4.23;
+pragma solidity >=0.4.24;
 
 import "../node_modules/openzeppelin-solidity/contracts/token/ERC721/ERC721.sol";
 
@@ -17,14 +17,14 @@ contract StarNotary is ERC721 {
   mapping(uint256 => uint256) starsForSaleMap;
 
   //Modifier: Ensure stars are only claimed once
-  modifier uniqueStar(string _ra, string _dec, string _mag) {
+  modifier uniqueStar(string memory _ra, string memory _dec, string memory _mag) {
     uint256 starKey = createMappingKeyHash(_ra, _dec, _mag);
     bool starExists = tokenIdToStarInfoMap[starKey].exists;
     require(!starExists, "Star already registered.");
     _;
   }
 
-  function checkIfStarExist(string _ra, string _dec, string _mag) public view returns (bool exists){
+  function checkIfStarExist(string memory _ra, string memory _dec, string memory _mag) public view returns (bool exists){
     uint256 starKey = createMappingKeyHash(_ra, _dec, _mag);
     bool starExists = tokenIdToStarInfoMap[starKey].exists;
     if(starExists) {
@@ -34,14 +34,14 @@ contract StarNotary is ERC721 {
     }
   }
 
-  function createStar(string _name, string _story, string _ra, string _dec, string _mag) public uniqueStar(_ra, _dec, _mag) { 
+  function createStar(string memory _name, string memory _story, string memory _ra, string memory _dec, string memory _mag) public uniqueStar(_ra, _dec, _mag) { 
     uint256 _tokenId = createMappingKeyHash(_ra, _dec, _mag);    
     Star memory newStar = Star(_name, _story, _ra, _dec, _mag, true);
     tokenIdToStarInfoMap[_tokenId] = newStar;
     _mint(msg.sender, _tokenId);
   }
 
-  function tokenIdToStarInfo(uint256 _tokenId) public view returns (string name, string story, string ra, string dec, string mag) {
+  function tokenIdToStarInfo(uint256 _tokenId) public view returns (string memory name, string memory story, string memory ra, string memory dec, string memory mag) {
     Star memory star = tokenIdToStarInfoMap[_tokenId];
     name = star.name;
     story = star.story;
@@ -68,10 +68,7 @@ contract StarNotary is ERC721 {
     address starOwner = this.ownerOf(_tokenId);
     require(msg.value >= starCost, "Not enough money available to buy the star.");
 
-    _removeTokenFrom(starOwner, _tokenId);
-    _addTokenTo(msg.sender, _tokenId);
-    
-    starOwner.transfer(starCost);
+    _transferFrom(starOwner, msg.sender, _tokenId);
 
     if(msg.value > starCost) { 
       msg.sender.transfer(msg.value - starCost);
@@ -79,7 +76,7 @@ contract StarNotary is ERC721 {
   }
   
   // Convert string coordinates into sha3 key
-  function createMappingKeyHash(string _ra, string _dec, string _mag) public pure returns (uint256) {
+  function createMappingKeyHash(string memory _ra, string memory _dec, string memory _mag) public pure returns (uint256) {
     bytes32 _bytes32Hash = keccak256(abi.encodePacked(_ra, _dec, _mag));
     return uint256(_bytes32Hash);
   }

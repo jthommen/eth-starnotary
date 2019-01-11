@@ -34,19 +34,31 @@ contract('StarNotary', accounts => {
       //      15432057850125
       //     ]
       // }
-      producedHash = await this.contract.createMappingKeyHash('ra_1', 'dec_1', 'mag_1');
+      producedHashObject = await this.contract.createMappingKeyHash('ra_1', 'dec_1', 'mag_1');
+      producedHash = producedHashObject.toString();
     });
 
     it('can generate the right hash', async function() {
-      const testHash = 69996144874036692685602125653978499545971898784920415761298302615432057850125;
-      assert.equal(producedHash.toNumber(), testHash);
+      const testHash = "69996144874036692685602125653978499545971898784920415761298302615432057850125";
       assert.equal(producedHash, testHash, 'Hashes generated from coordinates should be equal.');
     });
 
     it('can create a star and get its data', async function() {
+      let starInfo = await this.contract.tokenIdToStarInfo(producedHash);
       assert.deepEqual(
-        await this.contract.tokenIdToStarInfo(producedHash), 
-        ['First Star', 'Awesome star!', 'ra_1', 'dec_1', 'mag_1'], 'Returned star info should be equal.');
+        starInfo, 
+        {
+          '0': 'First Star',
+          '1': 'Awesome star!',
+          '2': 'ra_1',
+          '3': 'dec_1',
+          '4': 'mag_1',
+          name: 'First Star',
+          story: 'Awesome star!',
+          ra: 'ra_1',
+          dec: 'dec_1',
+          mag: 'mag_1'
+        }, 'Returned star info should be equal.');
     });
 
     it('can check if star exists', async function() {
@@ -83,7 +95,7 @@ contract('StarNotary', accounts => {
     let starId;
     let starId2;
     
-    let starPrice = web3.toWei(.01, 'ether');
+    let starPrice = web3.utils.toWei('.01', 'ether');
 
     beforeEach(async function() { 
       await this.contract.createStar('First Star', 'Awesome star!', 'ra_1', 'dec_1', 'mag_1', {from: user1});
@@ -134,7 +146,7 @@ contract('StarNotary', accounts => {
     let user2 = accounts[2];
     
     let starId;
-    let starPrice = web3.toWei(.01, 'ether');
+    let starPrice = web3.utils.toWei('.01', 'ether');
 
     beforeEach(async function() { 
       await this.contract.createStar('First Star', 'Awesome star!', 'ra_1', 'dec_1', 'mag_1', {from: user1});
@@ -158,12 +170,11 @@ contract('StarNotary', accounts => {
       });
 
       it('user2 ether balance changed correctly', async function () { 
-        let overpaidAmount = web3.toWei(.05, 'ether')
-        const balanceBeforeTransaction = web3.eth.getBalance(user2)
+        let overpaidAmount = web3.utils.toWei('.05', 'ether')
+        const balanceBeforeTransaction = await web3.eth.getBalance(user2)
         await this.contract.buyStar(starId, {from: user2, value: overpaidAmount, gasPrice: 0})
-        const balanceAfterTransaction = web3.eth.getBalance(user2)
-
-        assert.equal(balanceBeforeTransaction.sub(balanceAfterTransaction), starPrice)
+        const balanceAfterTransaction = await web3.eth.getBalance(user2)
+        assert.equal(balanceBeforeTransaction-balanceAfterTransaction, starPrice)
       });
     });
   });
